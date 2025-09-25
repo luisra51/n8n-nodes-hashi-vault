@@ -1,4 +1,8 @@
 # N8N HashiCorp Vault Node
+![npm version](https://img.shields.io/npm/v/n8n-nodes-hashi-vault)
+![npm downloads](https://img.shields.io/npm/dm/n8n-nodes-hashi-vault)
+![license](https://img.shields.io/npm/l/n8n-nodes-hashi-vault)
+![GitHub last commit](https://img.shields.io/github/last-commit/luisra51/n8n-nodes-hashi-vault)
 
 ![n8n.io - Workflow Automation](https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png)
 
