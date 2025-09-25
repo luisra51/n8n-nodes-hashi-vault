@@ -1,0 +1,72 @@
+{
+  "name": "n8n-nodes-hashi-vault",
+  "version": "1.1.8",
+  "description": "Secure N8N node for HashiCorp Vault integration with AppRole authentication - Hardened version",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "hashicorp",
+    "vault",
+    "secrets",
+    "approle",
+    "security-hardened"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Luis Sanchez",
+    "email": "luisra51@users.noreply.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luisra51/luisra51-n8n-nodes-hashi-vault.git"
+  },
+  "engines": {
+    "node": ">=18.10",
+    "pnpm": ">=9.1"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/HashiCorpVaultApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/HashiCorpVault/HashiCorpVault.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-security": "^2.1.0",
+    "jest": "^29.7.0",
+    "n8n-workflow": "^1.17.0",
+    "prettier": "^3.2.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": ">=1.60.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.9"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy:assets",
+    "copy:assets": "mkdir -p dist/nodes/HashiCorpVault && cp src/nodes/HashiCorpVault/*.svg dist/nodes/HashiCorpVault/",
+    "dev": "tsc --watch",
+    "format": "prettier src --write",
+    "lint": "eslint src --ext .ts,.js",
+    "lint:security": "eslint src --ext .ts,.js --config .eslintrc.security.js",
+    "test": "jest",
+    "test:security": "npm audit && npm run lint:security",
+    "prepare": "npm run build"
+  }
+}
