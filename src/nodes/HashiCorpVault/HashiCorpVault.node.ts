@@ -6,8 +6,6 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
-import axios from 'axios';
-
 // Helper functions
 async function getAppRoleToken(this: IExecuteFunctions, credentials: any) {
 	try {
@@ -17,27 +15,23 @@ async function getAppRoleToken(this: IExecuteFunctions, credentials: any) {
 		};
 
 		const appRolePath = credentials.appRolePath || 'approle';
-		const config = {
-			method: 'POST' as const,
+		const response = await this.helpers.httpRequest({
+			method: 'POST',
 			url: `${credentials.url}/v1/auth/${appRolePath}/login`,
-			data: loginData,
+			body: loginData,
 			headers: {
 				'Content-Type': 'application/json',
 				...(credentials.namespace && { 'X-Vault-Namespace': credentials.namespace }),
 			},
-		};
+			json: true,
+			skipSslCertificateValidation: credentials.allowUnauthorizedCerts === true,
+		});
 
-		if (credentials.allowUnauthorizedCerts) {
-			process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-		}
-
-		const response = await axios(config);
-
-		if (!response.data.auth?.client_token) {
+		if (!response.auth?.client_token) {
 			throw new NodeOperationError(this.getNode(), 'Failed to obtain token from AppRole login');
 		}
 
-		return response.data.auth.client_token;
+		return response.auth.client_token;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 		throw new NodeOperationError(this.getNode(), `AppRole authentication failed: ${errorMessage}`);
@@ -60,7 +54,7 @@ async function readSecret(this: IExecuteFunctions, config: any, secretEngine: st
 	}
 
 	try {
-		const response = await axios({
+		const response = await this.helpers.httpRequest({
 			...config,
 			method: 'GET',
 			url,
@@ -68,16 +62,16 @@ async function readSecret(this: IExecuteFunctions, config: any, secretEngine: st
 
 		if (apiVersion === 'v2') {
 			return {
-				data: response.data.data?.data || {},
-				metadata: response.data.data?.metadata || {},
-				lease_duration: response.data.lease_duration,
-				renewable: response.data.renewable,
+				data: response.data?.data || {},
+				metadata: response.data?.metadata || {},
+				lease_duration: response.lease_duration,
+				renewable: response.renewable,
 			};
 		} else {
 			return {
-				data: response.data.data || {},
-				lease_duration: response.data.lease_duration,
-				renewable: response.data.renewable,
+				data: response.data || {},
+				lease_duration: response.lease_duration,
+				renewable: response.renewable,
 			};
 		}
 	} catch (error: any) {
@@ -88,12 +82,12 @@ async function readSecret(this: IExecuteFunctions, config: any, secretEngine: st
 
 async function writeSecret(this: IExecuteFunctions, config: any, secretEngine: string, credentials: any, itemIndex: number) {
 	const secretPath = this.getNodeParameter('secretPath', itemIndex) as string;
-	const secretData = this.getNodeParameter('secretData', itemIndex) as string;
+	const secretData = this.getNodeParameter('secretData', itemIndex);
 	const apiVersion = credentials.apiVersion;
 
 	let parsedData: any;
 	try {
-		parsedData = JSON.parse(secretData);
+		parsedData = typeof secretData === 'string' ? JSON.parse(secretData) : secretData;
 	} catch (error) {
 		throw new NodeOperationError(this.getNode(), 'Secret data must be valid JSON');
 	}
@@ -112,17 +106,17 @@ async function writeSecret(this: IExecuteFunctions, config: any, secretEngine: s
 	}
 
 	try {
-		const response = await axios({
+		const response = await this.helpers.httpRequest({
 			...config,
 			method: 'POST',
 			url,
-			data: requestData,
+			body: requestData,
 		});
 
 		return {
 			success: true,
 			path: secretPath,
-			...(response.data.data && { metadata: response.data.data }),
+			...(response.data && { metadata: response.data }),
 		};
 	} catch (error: any) {
 		const errorMessage = error.response?.data?.errors?.[0] || (error instanceof Error ? error.message : 'Unknown error');
@@ -142,7 +136,7 @@ async function deleteSecret(this: IExecuteFunctions, config: any, secretEngine: 
 	}
 
 	try {
-		await axios({
+		await this.helpers.httpRequest({
 			...config,
 			method: 'DELETE',
 			url,
@@ -161,17 +155,21 @@ async function deleteSecret(this: IExecuteFunctions, config: any, secretEngine: 
 
 async function listSecrets(this: IExecuteFunctions, config: any, secretEngine: string, itemIndex: number) {
 	const listPath = this.getNodeParameter('listPath', itemIndex, '') as string;
-	const url = `/v1/${secretEngine}/metadata/${listPath}?list=true`;
+	const apiVersion = (config.apiVersion as string) || 'v2';
+	const url =
+		apiVersion === 'v2'
+			? `/v1/${secretEngine}/metadata/${listPath}?list=true`
+			: `/v1/${secretEngine}/${listPath}?list=true`;
 
 	try {
-		const response = await axios({
+		const response = await this.helpers.httpRequest({
 			...config,
 			method: 'GET',
 			url,
 		});
 
 		return {
-			keys: response.data.data?.keys || [],
+			keys: response.data?.keys || [],
 			path: listPath,
 		};
 	} catch (error: any) {
@@ -341,6 +339,19 @@ export class HashiCorpVault implements INodeType {
 				}
 
 				// Base configuration for axios
+				let parsedHeaders = {};
+				if (additionalFields.customHeaders) {
+					if (typeof additionalFields.customHeaders === 'string') {
+						try {
+							parsedHeaders = JSON.parse(additionalFields.customHeaders);
+						} catch (error) {
+							throw new NodeOperationError(this.getNode(), 'Custom headers must be valid JSON');
+						}
+					} else {
+						parsedHeaders = additionalFields.customHeaders;
+					}
+				}
+
 				const baseConfig = {
 					baseURL: credentials.url as string,
 					timeout: additionalFields.timeout || 30000,
@@ -348,13 +359,12 @@ export class HashiCorpVault implements INodeType {
 						'X-Vault-Token': vaultToken,
 						'Content-Type': 'application/json',
 						...(credentials.namespace && { 'X-Vault-Namespace': credentials.namespace as string }),
-						...(additionalFields.customHeaders && JSON.parse(additionalFields.customHeaders)),
+						...parsedHeaders,
 					},
+					json: true,
+					skipSslCertificateValidation: credentials.allowUnauthorizedCerts === true,
+					apiVersion: credentials.apiVersion,
 				};
-
-				if (credentials.allowUnauthorizedCerts) {
-					process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-				}
 
 				let responseData: any;
 
@@ -395,11 +405,6 @@ export class HashiCorpVault implements INodeType {
 				}
 				throw error;
 			}
-		}
-
-		// Reset SSL behavior
-		if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
-			delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
 		}
 
 		return [returnData];

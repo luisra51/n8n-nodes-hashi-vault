@@ -1,8 +1,9 @@
-import { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class HashiCorpVaultApi implements ICredentialType {
 	name = 'hashiCorpVaultApi';
 	displayName = 'HashiCorp Vault API';
+	icon = 'file:../nodes/HashiCorpVault/hashicorp.svg';
 	documentationUrl = 'https://www.vaultproject.io/api-docs';
 
 
@@ -136,4 +137,11 @@ export class HashiCorpVaultApi implements ICredentialType {
 			description: 'Whether to connect even if SSL certificate validation is not possible',
 		},
 	];
+
+	test: ICredentialTestRequest = {
+		request: {
+			method: 'GET',
+			url: '={{$credentials.url}}/v1/sys/health',
+		},
+	};
 }

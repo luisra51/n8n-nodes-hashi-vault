@@ -55,9 +55,7 @@
   "peerDependencies": {
     "n8n-workflow": ">=1.60.0"
   },
-  "dependencies": {
-    "axios": "^1.7.9"
-  },
+  "dependencies": {},
   "scripts": {
     "build": "tsc && npm run copy:assets",
     "copy:assets": "mkdir -p dist/nodes/HashiCorpVault && cp src/nodes/HashiCorpVault/*.svg dist/nodes/HashiCorpVault/",
