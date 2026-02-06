@@ -58,11 +58,11 @@
   "dependencies": {},
   "scripts": {
     "build": "tsc && npm run copy:assets",
-    "copy:assets": "mkdir -p dist/nodes/HashiCorpVault && cp src/nodes/HashiCorpVault/*.svg dist/nodes/HashiCorpVault/",
+    "copy:assets": "mkdir -p dist/nodes/HashiCorpVault && cp nodes/HashiCorpVault/*.svg dist/nodes/HashiCorpVault/",
     "dev": "tsc --watch",
-    "format": "prettier src --write",
-    "lint": "eslint src --ext .ts,.js",
-    "lint:security": "eslint src --ext .ts,.js --config .eslintrc.security.js",
+    "format": "prettier credentials nodes index.ts --write",
+    "lint": "eslint credentials nodes index.ts --ext .ts,.js",
+    "lint:security": "eslint credentials nodes index.ts --ext .ts,.js --config .eslintrc.security.js",
     "test": "jest",
     "test:security": "npm audit && npm run lint:security",
     "prepare": "npm run build"
