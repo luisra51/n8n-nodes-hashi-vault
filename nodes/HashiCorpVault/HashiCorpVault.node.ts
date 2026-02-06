@@ -472,11 +472,28 @@ export class HashiCorpVault implements INodeType {
 				}
 
 				if (additionalFields.maskSecrets && responseData?.data && typeof responseData.data === 'object') {
-					const pattern = typeof additionalFields.maskRegex === 'string' ? additionalFields.maskRegex : '';
+					const patternRaw = typeof additionalFields.maskRegex === 'string' ? additionalFields.maskRegex : '';
 					let regex: RegExp | null = null;
-					if (pattern.trim().length > 0) {
+					if (patternRaw.trim().length > 0) {
 						try {
-							regex = new RegExp(pattern);
+							// Support common user inputs:
+							// 1) Inline flag (?i) prefix
+							// 2) /pattern/flags notation
+							let pattern = patternRaw;
+							let flags = '';
+
+							if (pattern.startsWith('(?i)')) {
+								pattern = pattern.slice(4);
+								flags = 'i';
+							}
+
+							const slashRegex = patternRaw.match(/^\/(.+)\/([a-z]*)$/i);
+							if (slashRegex) {
+								pattern = slashRegex[1];
+								flags = slashRegex[2] || flags;
+							}
+
+							regex = new RegExp(pattern, flags);
 						} catch (error) {
 							throw new NodeOperationError(this.getNode(), 'Mask regex is invalid');
 						}
