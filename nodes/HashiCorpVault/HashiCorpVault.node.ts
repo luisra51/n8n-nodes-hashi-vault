@@ -353,6 +353,26 @@ export class HashiCorpVault implements INodeType {
 				default: {},
 				options: [
 					{
+						displayName: 'Mask Secret Values',
+						name: 'maskSecrets',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to mask secret values in the output',
+					},
+					{
+						displayName: 'Mask Keys (Regex)',
+						name: 'maskRegex',
+						type: 'string',
+						default: '(?i)(password|pass|secret|token|api.?key|private|key)$',
+						description:
+							'Regex to match keys that should be masked (e.g. (?i)(password|token|api.?key)$)',
+						displayOptions: {
+							show: {
+								maskSecrets: [true],
+							},
+						},
+					},
+					{
 						displayName: 'Insecure TLS (Skip Certificate Validation)',
 						name: 'insecureTlsNotice',
 						type: 'notice',
@@ -449,6 +469,32 @@ export class HashiCorpVault implements INodeType {
 						break;
 					default:
 						throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`);
+				}
+
+				if (additionalFields.maskSecrets && responseData?.data && typeof responseData.data === 'object') {
+					const pattern = typeof additionalFields.maskRegex === 'string' ? additionalFields.maskRegex : '';
+					let regex: RegExp | null = null;
+					if (pattern.trim().length > 0) {
+						try {
+							regex = new RegExp(pattern);
+						} catch (error) {
+							throw new NodeOperationError(this.getNode(), 'Mask regex is invalid');
+						}
+					}
+
+					const masked: IDataObject = {};
+					for (const [key, value] of Object.entries(responseData.data as IDataObject)) {
+						if (regex && regex.test(key)) {
+							masked[key] = '***';
+						} else {
+							masked[key] = value as IDataObject[keyof IDataObject];
+						}
+					}
+
+					responseData = {
+						...responseData,
+						data: masked,
+					};
 				}
 
 				returnData.push({

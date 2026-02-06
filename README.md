@@ -22,6 +22,7 @@ This package was created as a secure alternative after identifying:
 - **KV v1 & v2 Support**: Works with both Key-Value secret engines
 - **Namespace Support**: Enterprise Vault namespace functionality
 - **SSL Configuration**: Flexible SSL certificate validation options
+- **Optional Output Masking**: Regex-based masking of sensitive keys in node outputs
 - **Security Hardened**: Updated dependencies to resolve CVE vulnerabilities
 
 ## 📦 Installation
@@ -49,6 +50,8 @@ npm install n8n-nodes-hashi-vault
    - **Namespace**: Vault namespace (Enterprise feature)
    - **API Version**: KV engine version (v1 or v2)
    - **Ignore SSL Issues**: Skip SSL certificate validation
+   - **Mask Secret Values**: Mask sensitive output values in node responses
+   - **Mask Keys (Regex)**: Regex used to decide which keys to mask
 
 ## ⚙️ Vault Configuration Examples
 
@@ -107,7 +110,11 @@ vault write -f auth/approle/role/n8n-role/secret-id
 {
   "secretEngine": "secret",
   "secretPath": "myapp/database",
-  "version": 0
+  "version": 0,
+  "additionalFields": {
+    "maskSecrets": true,
+    "maskRegex": "(?i)(password|token|api.?key)$"
+  }
 }
 ```
 
