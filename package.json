@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-hashi-vault",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Secure N8N node for HashiCorp Vault integration with AppRole authentication - Hardened version",
   "keywords": [
     "n8n-community-node-package",
