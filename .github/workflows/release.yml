@@ -3,7 +3,8 @@ name: Release to npm
 on:
   push:
     tags:
-      - 'v*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
 
 jobs:
   publish:
@@ -25,13 +26,13 @@ jobs:
 
       - name: Verify tag matches package.json version
         run: |
-          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          TAG_VERSION="${GITHUB_REF#refs/tags/}"
           PKG_VERSION=$(node -p "require('./package.json').version")
           if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "::error::Tag v$TAG_VERSION does not match package.json version ($PKG_VERSION)"
+            echo "::error::Tag $TAG_VERSION does not match package.json version ($PKG_VERSION)"
             exit 1
           fi
-          echo "Tag v$TAG_VERSION matches package.json version"
+          echo "Tag $TAG_VERSION matches package.json version"
 
       - name: Lint n8n node structure
         run: |
