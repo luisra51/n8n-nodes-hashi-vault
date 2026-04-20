@@ -261,19 +261,19 @@ export class HashiCorpVault implements INodeType {
 						name: 'Read Secret',
 						value: 'readSecret',
 						description: 'Read a secret from Vault',
-						action: 'Read a secret from Vault',
+						action: 'Read a secret from vault',
 					},
 					{
 						name: 'Write Secret',
 						value: 'writeSecret',
 						description: 'Write a secret to Vault',
-						action: 'Write a secret to Vault',
+						action: 'Write a secret to vault',
 					},
 					{
 						name: 'Delete Secret',
 						value: 'deleteSecret',
 						description: 'Delete a secret from Vault',
-						action: 'Delete a secret from Vault',
+						action: 'Delete a secret from vault',
 					},
 					{
 						name: 'List Secrets',
@@ -284,6 +284,7 @@ export class HashiCorpVault implements INodeType {
 				],
 				default: 'readSecret',
 			},
+			/* eslint-disable n8n-nodes-base/node-param-type-options-password-missing, n8n-nodes-base/cred-class-field-type-options-password-missing */
 			{
 				displayName: 'Secret Engine',
 				name: 'secretEngine',
@@ -307,6 +308,7 @@ export class HashiCorpVault implements INodeType {
 					},
 				},
 			},
+			/* eslint-enable n8n-nodes-base/node-param-type-options-password-missing, n8n-nodes-base/cred-class-field-type-options-password-missing */
 			{
 				displayName: 'List Path',
 				name: 'listPath',
@@ -353,11 +355,19 @@ export class HashiCorpVault implements INodeType {
 				default: {},
 				options: [
 					{
-						displayName: 'Mask Secret Values',
-						name: 'maskSecrets',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to mask secret values in the output',
+						displayName: 'Custom Headers',
+						name: 'customHeaders',
+						type: 'json',
+						default: '{}',
+						description: 'Custom headers to send with the request',
+					},
+					{
+						displayName: 'Insecure TLS (Skip Certificate Validation)',
+						name: 'insecureTlsNotice',
+						type: 'notice',
+						default: '',
+						description:
+							'Use this only for testing. For production, keep TLS verification enabled.',
 					},
 					{
 						displayName: 'Mask Keys (Regex)',
@@ -373,19 +383,11 @@ export class HashiCorpVault implements INodeType {
 						},
 					},
 					{
-						displayName: 'Insecure TLS (Skip Certificate Validation)',
-						name: 'insecureTlsNotice',
-						type: 'notice',
-						default: '',
-						description:
-							'Use this only for testing. For production, keep TLS verification enabled.',
-					},
-					{
-						displayName: 'Custom Headers',
-						name: 'customHeaders',
-						type: 'json',
-						default: '{}',
-						description: 'Custom headers to send with the request',
+						displayName: 'Mask Secret Values',
+						name: 'maskSecrets',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to mask secret values in the output',
 					},
 					{
 						displayName: 'Timeout',

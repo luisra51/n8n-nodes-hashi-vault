@@ -4,7 +4,8 @@ export class HashiCorpVaultApi implements ICredentialType {
 	name = 'hashiCorpVaultApi';
 	displayName = 'HashiCorp Vault API';
 	icon = 'file:../nodes/HashiCorpVault/hashicorp.svg';
-	documentationUrl = 'https://www.vaultproject.io/api-docs';
+	// eslint-disable-next-line n8n-nodes-base/cred-class-field-documentation-url-miscased, n8n-nodes-base/cred-class-field-documentation-url-not-http-url
+	documentationUrl = 'https://developer.hashicorp.com/vault/api-docs';
 
 
 	properties: INodeProperties[] = [
@@ -118,11 +119,11 @@ export class HashiCorpVaultApi implements ICredentialType {
 			type: 'options',
 			options: [
 				{
-					name: 'v1',
+					name: 'V1',
 					value: 'v1',
 				},
 				{
-					name: 'v2',
+					name: 'V2',
 					value: 'v2',
 				},
 			],
