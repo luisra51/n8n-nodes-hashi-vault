@@ -25,6 +25,13 @@ This package was created as a secure alternative after identifying:
 - **Optional Output Masking**: Regex-based masking of sensitive keys in node outputs
 - **Security Hardened**: Updated dependencies to resolve CVE vulnerabilities
 
+## ☕ Support
+
+If you like this project, consider [buying me a coffee](https://buymeacoffee.com/luisra51) ☕💛
+<a href="https://www.buymeacoffee.com/luisra51" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200"/>
+</a>
+
 ## 📦 Installation
 
 ```bash
